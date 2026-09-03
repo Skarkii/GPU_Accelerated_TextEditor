@@ -1,0 +1,24 @@
+# Build directories
+build/
+build-*/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Compiled shaders
+*.spv
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Nix
+result
+result-*
+.direnv/
