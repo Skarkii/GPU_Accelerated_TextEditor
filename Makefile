@@ -1,4 +1,4 @@
-.PHONY: init build clear init-windows build-windows clear-windows
+.PHONY: init build clear test init-windows build-windows clear-windows
 
 # Linux targets
 init:
@@ -6,6 +6,9 @@ init:
 
 build:
 	cmake --build build
+
+test: build
+	ctest --test-dir build --output-on-failure
 
 clear:
 	rm -rf build

@@ -27,6 +27,9 @@
           # Shader compilation
           shaderc
           glslang
+
+          # Testing
+          catch2_3
         ];
 
         commonNativeBuildInputs = with pkgs; [

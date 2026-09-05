@@ -67,3 +67,36 @@ target_compile_options(gpu_text_editor PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
+
+# Testing (Linux only)
+if(NOT WIN32)
+    include(FetchContent)
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.5.2
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(Catch2)
+
+    add_executable(rope_tests
+        tests/rope_test.cpp
+        src/rope.cpp
+    )
+
+    target_include_directories(rope_tests PRIVATE
+        ${CMAKE_SOURCE_DIR}/src
+    )
+
+    target_link_libraries(rope_tests PRIVATE
+        Catch2::Catch2WithMain
+    )
+
+    target_compile_options(rope_tests PRIVATE
+        -Wall -Wextra -Wpedantic
+    )
+
+    include(CTest)
+    include(Catch)
+    catch_discover_tests(rope_tests)
+endif()

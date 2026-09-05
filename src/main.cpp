@@ -23,8 +23,19 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "Hello World!\n";
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
+    GLFWwindow* glWindow = glfwCreateWindow(1920, 1080, "Text-Editor", nullptr, nullptr);
+
+    if(!glWindow) {
+        return EXIT_FAILURE;
+    }
+
+    while(!glfwWindowShouldClose(glWindow)){
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(glWindow);
     glfwTerminate();
     return EXIT_SUCCESS;
 }
