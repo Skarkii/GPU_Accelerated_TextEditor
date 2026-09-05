@@ -3,11 +3,50 @@
 #include <stdexcept>
 #include <cassert>
 
+static size_t utf8Length(const std::string& str) {
+    size_t count = 0;
+    for (unsigned char c : str) {
+        if ((c & 0xC0) != 0x80) {
+            count++;
+        }
+    }
+    return count;
+}
+
+static size_t utf8ByteOffset(const std::string& str, size_t charPos) {
+    size_t bytePos = 0;
+    size_t chars = 0;
+    while (bytePos < str.size()) {
+        if ((static_cast<unsigned char>(str[bytePos]) & 0xC0) != 0x80) {
+            if (chars == charPos) {
+                return bytePos;
+            }
+            chars++;
+        }
+        bytePos++;
+    }
+    return bytePos;
+}
+
+static std::string utf8CharAt(const std::string& str, size_t charPos) {
+    size_t byteStart = utf8ByteOffset(str, charPos);
+    if (byteStart >= str.size()) return "";
+
+    unsigned char first = str[byteStart];
+    size_t len = 1;
+    if ((first & 0x80) == 0) len = 1;
+    else if ((first & 0xE0) == 0xC0) len = 2;
+    else if ((first & 0xF0) == 0xE0) len = 3;
+    else if ((first & 0xF8) == 0xF0) len = 4;
+
+    return str.substr(byteStart, len);
+}
+
 RopeNode* RopeNode::createLeaf(std::string_view content) {
     RopeNode* node = new RopeNode{};
 
     node->text = content;
-    node->weight = content.size();
+    node->weight = utf8Length(std::string(content));
 
     return node;
 }
@@ -63,7 +102,8 @@ Rope::Rope(std::string_view text) {
     }
 }
 
-char Rope::at(size_t index) const {
+
+std::string Rope::at(size_t index) const {
     if (!root) {
         throw std::out_of_range("empty rope");
     }
@@ -84,7 +124,7 @@ char Rope::at(size_t index) const {
         assert(node != nullptr);
     }
 
-    return node->text.at(index);
+    return utf8CharAt(node->text, index);
 }
 
 static RopeNode* concat(RopeNode* left, RopeNode* right) {
@@ -97,8 +137,9 @@ static std::pair<RopeNode*, RopeNode*> split(RopeNode* node, size_t pos) {
     if (!node) return {nullptr, nullptr};
 
     if (node->isLeaf()) {
-        std::string leftText = node->text.substr(0, pos);
-        std::string rightText = node->text.substr(pos);
+        size_t bytePos = utf8ByteOffset(node->text, pos);
+        std::string leftText = node->text.substr(0, bytePos);
+        std::string rightText = node->text.substr(bytePos);
 
         RopeNode* leftLeaf = leftText.empty() ? nullptr : RopeNode::createLeaf(leftText);
         RopeNode* rightLeaf = rightText.empty() ? nullptr : RopeNode::createLeaf(rightText);

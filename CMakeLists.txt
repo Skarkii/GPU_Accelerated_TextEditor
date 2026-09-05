@@ -38,6 +38,9 @@ endif()
 # Main executable
 add_executable(gpu_text_editor
     src/main.cpp
+    src/application.cpp
+    src/window.cpp
+    src/renderer.cpp
 )
 
 target_include_directories(gpu_text_editor PRIVATE
